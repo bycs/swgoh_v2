@@ -22,7 +22,7 @@ def get_units_player(ally_code):
                                     'unit.data.rarity', 'unit.data.gear_level', 'unit.data.relic_tier',
                                     'unit.data.power', 'unit.data.stats.1', 'unit.data.stats.28', 'unit.data.stats.5',
                                     'unit.data.stats.6', 'unit.data.stats.16', 'unit.data.stats.14',
-                                    'unit.data.stats.17', 'unit.data.stats.18'])
+                                    'unit.data.stats.17', 'unit.data.stats.18', 'unit.data.combat_type'])
     units.loc[:, 'unit.data.rarity':'unit.data.relic_tier'] = \
         units.loc[:, 'unit.data.rarity':'unit.data.relic_tier'].astype('int8')
     units.loc[:, 'unit.data.power':'unit.data.stats.28'] = \
@@ -31,7 +31,26 @@ def get_units_player(ally_code):
         units.loc[:, 'unit.data.stats.5':'unit.data.stats.6'].astype('int16')
     units.loc[:, 'unit.data.stats.16':'unit.data.stats.18'] = \
         units.loc[:, 'unit.data.stats.16':'unit.data.stats.18'].astype('float16')
+    units.loc[:, 'unit.data.combat_type'] = units.loc[:, 'unit.data.combat_type'].astype('int8')
+    units.set_axis(
+        ['ally_code', 'player_name', 'unit_id', 'unit_name', 'rarity', 'gear_level', 'relic_tier ', 'power',
+         'health', 'protection', 'speed', 'physical_damage', 'critical_damage', 'critical_chance',
+         'potency', 'tenacity', 'combat_type'], axis='columns', inplace=True)
     return units
+
+
+def units_combat_type(units):
+    """
+    Разделение юнитов по классам
+
+    :Ввод units:
+    :return два массива: с персонажами и флотом:
+    """
+    characters = units[units['combat_type'] == 1]
+    ships = units[units['combat_type'] == 2]
+    del characters['combat_type']
+    ships = ships.loc[:, ['ally_code', 'player_name', 'unit_id', 'unit_name', 'rarity', 'power']]
+    return characters, ships
 
 
 def get_data_player(ally_code):
