@@ -8,6 +8,12 @@ import pandas as pd
 
 
 def get_units_player(ally_code):
+    """
+    Получение списка персонажей по игроку
+
+    :Ввод ally_code:
+    :return массив с персонажами:
+    """
     link = f'https://swgoh.gg/api/player/{ally_code}/'
     units = pd.json_normalize(requests.get(link).json(), 'units', [['data', 'name'], ['data', 'ally_code']],
                               record_prefix='unit.', max_level=2,)
@@ -29,18 +35,24 @@ def get_units_player(ally_code):
 
 
 def get_data_player(ally_code):
+    """
+    Получение информации по игроку
+
+    :Ввод ally_code:
+    :return массив с данными о игроке:
+    """
     link = f'https://swgoh.gg/api/player/{ally_code}/'
     data = pd.json_normalize(requests.get(link).json()['data'])
     return data
 
 
-def get_player(ally_code):
-    link = f'https://swgoh.gg/api/player/{ally_code}/'
-    player = pd.json_normalize(requests.get(link).json())
-    return player
-
-
 def get_ally_list(guild_id):
+    """
+    Получение списка игроков гильдии
+
+    :Ввод guild_id:
+    :return массив с игроками гильдии:
+    """
     link = f'https://swgoh.gg/api/guild/{guild_id}/'
     ally_list = pd.json_normalize(
         requests.get(link).json()['players']).loc[:, 'data.ally_code']
@@ -48,6 +60,12 @@ def get_ally_list(guild_id):
 
 
 def get_units_guild(ally_list):
+    """
+    Получение списка персонажей по игрокам гильдии
+
+    :Ввод ally_list:
+    :return массив с персонажами гильдии:
+    """
     units = pd.DataFrame(
         data=None, index=None)
     for player in ally_list:
