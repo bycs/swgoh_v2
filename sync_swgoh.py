@@ -148,7 +148,7 @@ def sync_for_ally_list(ally_list):
     units = pd.DataFrame(data=None, index=None)
     for player in ally_list:
         data = pd.concat([data, get_data_player(int(player))])
-        units = pd.concat([data, get_units_player(int(player))])
+        units = pd.concat([units, get_units_player(int(player))])
     chars, ships = units_combat_type(units)
     return data, chars, ships
 
