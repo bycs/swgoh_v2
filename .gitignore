@@ -1,2 +1,10 @@
-/test/
-/test.py
+.git/
+.idea/
+.vscode/
+__pycache__/
+venv/
+
+*/test/
+*/test.py
+
+*.db
