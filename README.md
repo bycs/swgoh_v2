@@ -1,5 +1,5 @@
-# swgoh_v2
-# 🎮 Import data from swgoh.gg
+# swgoh_v2 (Made in Python)
+### 🎮 Import data from swgoh.gg
 #### • by player
 #### • by the list of players
 #### • by the Guild
