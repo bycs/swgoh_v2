@@ -82,7 +82,7 @@ swgoh_v2 (Made in Python)
 > :return массив со всеми способностями (DataFrame):
 
 * get_base_units_and_abilities()
-> :return три массива со всеми персонажами, флотом и способностями (DataFrame x3):
+> :return два массива со всеми юнитами и способностями (DataFrame x2):
 
 * sync_for_ally_list(ally_list)
 > Получение строки со списком кодов игроков  

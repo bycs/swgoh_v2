@@ -1,5 +1,5 @@
 """
-Импорт и структуризация данных с  сайта swgoh.gg через API
+Импорт и структуризация данных с сайта swgoh.gg через API
 с использованием библиотеки pandas
 """
 
@@ -129,9 +129,10 @@ def get_base_units(combat_type):
     """
     link = f'https://swgoh.gg/api/{combat_type}/'
     units = pd.json_normalize(requests.get(link).json())
-    units = pd.DataFrame(units, index=None, columns=['base_id', 'name', 'power', 'image'])
+    units = pd.DataFrame(units, index=None, columns=['base_id', 'name', 'power', 'image', 'combat_type'])
     units.loc[:, 'power'] = units.loc[:, 'power'].astype('int32')
-    units.set_axis(['unit_id', 'unit_name', 'max_power', 'url_image'], axis='columns', inplace=True)
+    units.loc[:, 'combat_type'] = units.loc[:, 'combat_type'].astype('int8')
+    units.set_axis(['unit_id', 'unit_name', 'max_power', 'url_image', 'combat_type'], axis='columns', inplace=True)
     units = units.sort_values(by=['unit_id']).reset_index(drop=True)
     return units
 
@@ -154,12 +155,13 @@ def get_base_abilities():
 
 def get_base_units_and_abilities():
     """
-    :return три массива со всеми персонажами, флотом и способностями (DataFrame x3):
+    :return два массива со всеми юнитами и способностями (DataFrame x2):
     """
     chars = get_base_units('characters')
     ships = get_base_units('ships')
+    units = pd.concat([chars, ships]).sort_values(by=['combat_type']).reset_index(drop=True)
     abilities = get_base_abilities()
-    return chars, ships, abilities
+    return units, abilities
 
 
 def sync_for_ally_list(ally_list):
