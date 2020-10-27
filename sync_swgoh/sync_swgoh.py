@@ -1,5 +1,5 @@
 """
-Импорт и структуризация данных с сайта swgoh.gg через API
+Импорт и структуризация данных с  сайта swgoh.gg через API
 с использованием библиотеки pandas
 """
 
@@ -17,10 +17,11 @@ def get_data_player(ally_code):
     link = f'https://swgoh.gg/api/player/{ally_code}/'
     data = pd.json_normalize(requests.get(link).json()['data'])
     data = pd.DataFrame(
-        data, index=None, columns=['ally_code', 'name', 'character_galactic_power', 'ship_galactic_power',
-                                   'galactic_power'])
-    data.set_axis(
-        ['ally_code', 'player_name', 'gp_chars', 'gp_ships', 'gp_all'], axis='columns', inplace=True)
+        data=data,
+        index=None,
+        columns=['ally_code', 'name', 'character_galactic_power', 'ship_galactic_power', 'galactic_power']
+    )
+    data.set_axis(['ally_code', 'player_name', 'gp_chars', 'gp_ships', 'gp_all'], axis='columns', inplace=True)
     data.loc[:, 'ally_code'] = data.loc[:, 'ally_code'].astype('int32')
     data.loc[:, 'gp_chars':'gp_all'] = data.loc[:, 'gp_chars':'gp_all'].astype('int32')
     return data
@@ -37,11 +38,14 @@ def get_units_player(ally_code):
     units = pd.json_normalize(requests.get(link).json(), 'units', [['data', 'name'], ['data', 'ally_code']],
                               record_prefix='unit.', max_level=2,)
     units = pd.DataFrame(
-        units, index=None, columns=['data.ally_code', 'unit.data.base_id',
-                                    'unit.data.rarity', 'unit.data.gear_level', 'unit.data.relic_tier',
-                                    'unit.data.power', 'unit.data.stats.1', 'unit.data.stats.28', 'unit.data.stats.5',
-                                    'unit.data.stats.6', 'unit.data.stats.16', 'unit.data.stats.14',
-                                    'unit.data.stats.17', 'unit.data.stats.18', 'unit.data.combat_type'])
+        data=units,
+        index=None,
+        columns=[
+            'data.ally_code', 'unit.data.base_id', 'unit.data.rarity', 'unit.data.gear_level', 'unit.data.relic_tier',
+            'unit.data.power', 'unit.data.stats.1', 'unit.data.stats.28', 'unit.data.stats.5', 'unit.data.stats.6',
+            'unit.data.stats.16', 'unit.data.stats.14', 'unit.data.stats.17', 'unit.data.stats.18',
+            'unit.data.combat_type']
+    )
     units.loc[:, 'unit.data.rarity':'unit.data.relic_tier'] = \
         units.loc[:, 'unit.data.rarity':'unit.data.relic_tier'].astype('int8')
     units.loc[:, 'unit.data.power':'unit.data.stats.28'] = \
@@ -54,7 +58,10 @@ def get_units_player(ally_code):
     units.set_axis(
         ['ally_code', 'unit_id', 'rarity', 'gear_level', 'relic_tier ', 'power',
          'health', 'protection', 'speed', 'physical_damage', 'critical_damage', 'critical_chance',
-         'potency', 'tenacity', 'combat_type'], axis='columns', inplace=True)
+         'potency', 'tenacity', 'combat_type'],
+        axis='columns',
+        inplace=True
+    )
     units = units.sort_values(by=['unit_id']).reset_index(drop=True)
     return units
 
@@ -143,19 +150,25 @@ def get_base_abilities():
     """
     link_abilities = 'https://swgoh.gg/api/abilities/'
     abilities = pd.json_normalize(requests.get(link_abilities).json())
-    abilities = pd.DataFrame(abilities, index=None, columns=[
-        'base_id', 'name', 'combat_type', 'character_base_id', 'ship_base_id',
-        'tier_max',  'is_zeta', 'is_omega', 'image'])
-    abilities.set_axis([
-        'ability_id', 'ability_name', 'combat_type', 'char_id', 'ship_id',
-        'tier_max', 'is_zeta', 'is_omega', 'url_image'], axis='columns', inplace=True)
-    abilities = abilities.sort_values(by=['char_id', 'ship_id', 'ability_id']).reset_index(drop=True)
+    abilities = pd.DataFrame(
+        data=abilities,
+        index=None,
+        columns=['base_id', 'name', 'character_base_id', 'ship_base_id', 'tier_max',  'is_zeta', 'is_omega', 'image']
+    )
+    abilities.set_axis(
+        ['ability_id', 'ability_name', 'char_id', 'ship_id', 'tier_max', 'is_zeta', 'is_omega', 'url_image'],
+        axis='columns',
+        inplace=True
+    )
+    abilities['unit_id'] = abilities['char_id'].combine_first(abilities['ship_id'])
+    abilities = abilities[['ability_id', 'ability_name', 'unit_id', 'tier_max', 'is_zeta', 'is_omega', 'url_image']]
+    abilities = abilities.sort_values(by=['unit_id', 'ability_id']).reset_index(drop=True)
     return abilities
 
 
 def get_base_units_and_abilities():
     """
-    :return два массива со всеми юнитами и способностями (DataFrame x2):
+    :return три массива со всеми персонажами, флотом и способностями (DataFrame x3):
     """
     chars = get_base_units('characters')
     ships = get_base_units('ships')
