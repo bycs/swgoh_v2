@@ -160,6 +160,7 @@ def get_base_abilities():
         axis='columns',
         inplace=True
     )
+    abilities.loc[:, 'tier_max'] = abilities.loc[:, 'tier_max'].astype('int8')
     abilities['unit_id'] = abilities['char_id'].combine_first(abilities['ship_id'])
     abilities = abilities[['ability_id', 'ability_name', 'unit_id', 'tier_max', 'is_zeta', 'is_omega', 'url_image']]
     abilities = abilities.sort_values(by=['unit_id', 'ability_id']).reset_index(drop=True)
