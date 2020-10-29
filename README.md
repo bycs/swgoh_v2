@@ -11,7 +11,7 @@ swgoh_v2 (Made in Python)
 >https://python-poetry.org/docs/#installation
 * Recommendation
 > poerty config virtualenvs.in-project true
-* Creating creating a virtual environment and installing dependencies
+* Creating a virtual environment and installing dependencies
 > poetry install
 ***
 📠 Basic functions:
