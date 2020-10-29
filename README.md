@@ -64,13 +64,13 @@ swgoh_v2 (Made in Python)
 > :return два массива: с персонажами и флотом (DataFrame x2):
 
 * get_ally_list(guild_id)
-> Получение списка игроков гильдии  
+> Получение списка кодов игроков гильдии  
 > :input guild_id (int):  
-> :return строка с игроками гильдии (str):
+> :return список с игроками гильдии (list(int)):
 
 * get_ally_count(guild_id)
 > Подсчет количества игроков в гильдии  
-> :input guild_id (str):  
+> :input guild_id (int):  
 > :return количетсво игроков в гильдии (int):
 
 * get_base_units(combat_type)
@@ -85,8 +85,8 @@ swgoh_v2 (Made in Python)
 > :return два массива со всеми юнитами и способностями (DataFrame x2):
 
 * sync_for_ally_list(ally_list)
-> Получение строки со списком кодов игроков  
-> :input ally_list (str):  
+> Получение списка кодов игроков  
+> :input ally_list (list(int)):  
 > :return три массива игроки, персонажи, флот (DataFrame x3):
 
 * sync_for_guild_id(guild_id)
