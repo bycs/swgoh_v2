@@ -38,14 +38,19 @@ swgoh_v2 (Made in Python)
 ***
 📝 List of functions
 ---
-* get_data_player(ally_code)
-> Получение информации по игроку  
+* get_player_json(ally_code)
+> Получение json по игроку  
 > :input ally_code (int):  
+> :return json:
+
+* get_data_player(json)
+> Получение информации по игроку из json  
+> :input json:  
 > :return массив с данными о игроке (DataFrame):
 
-* get_units_player(ally_code)
-> Получение списка персонажей по игроку  
-> :input ally_code (int):  
+* get_units_player(json)
+> Получение списка персонажей по игроку из json  
+> :input json:  
 > :return массив с персонажами (DataFrame):
 
 * units_type_chars(units)
