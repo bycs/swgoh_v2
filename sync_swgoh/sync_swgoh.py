@@ -5,9 +5,16 @@
 
 import requests
 import pandas as pd
+from datetime import datetime
 
 
 def get_player_json(ally_code):
+    """
+    Получение json по игроку
+
+    :input ally_code (int):
+    :return json:
+    """
     link = f'https://swgoh.gg/api/player/{ally_code}/'
     json = requests.get(link).json()
     return json
@@ -15,12 +22,14 @@ def get_player_json(ally_code):
 
 def get_data_player(json):
     """
-    Получение информации по игроку
+    Получение информации по игроку из json
 
-    :input ally_code (int):
+    :input json:
     :return массив с данными о игроке (DataFrame):
     """
-    data = pd.json_normalize(json['data'])
+    data = json['data']
+    data['last_updated'] = datetime.fromisoformat(data['last_updated'])
+    data = pd.json_normalize(data)
     data = pd.DataFrame(
         data=data,
         index=None,
@@ -34,15 +43,14 @@ def get_data_player(json):
     )
     data.loc[:, 'ally_code'] = data.loc[:, 'ally_code'].astype('int32')
     data.loc[:, 'gp_chars':'gp_total'] = data.loc[:, 'gp_chars':'gp_total'].astype('int32')
-    data['last_updated'] = data['last_updated'].astype('datetime64[ns, Europe/Moscow]')
     return data
 
 
 def get_units_player(json):
     """
-    Получение списка персонажей по игроку
+    Получение списка персонажей по игроку из json
 
-    :input ally_code (int):
+    :input json:
     :return массив с персонажами (DataFrame):
     """
     units = pd.json_normalize(json, 'units', [['data', 'name'], ['data', 'ally_code']],
@@ -215,6 +223,16 @@ def sync_for_guild_id(guild_id):
     :input guild_id (int):
     :return три массива игроки, персонажи, флот (DataFrame x3):
     """
-    ally_list = get_ally_list(guild_id)
-    data, chars, ships = sync_for_ally_list(ally_list)
+    link = f'https://swgoh.gg/api/guild/{guild_id}/'
+    json = requests.get(link).json()['players']
+    data = pd.DataFrame(data=None, index=None)
+    units = pd.DataFrame(data=None, index=None)
+    for player in range(len(json)):
+        data_player = get_data_player(json[player])
+        units_player = get_units_player(json[player])
+        data = pd.concat([data, data_player])
+        units = pd.concat([units, units_player])
+    data = data.sort_values(by=['player_name']).reset_index(drop=True)
+    units = units.sort_values(by=['ally_code']).reset_index(drop=True)
+    chars, ships = units_combat_type(units)
     return data, chars, ships
