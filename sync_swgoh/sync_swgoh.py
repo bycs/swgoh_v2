@@ -6,6 +6,7 @@
 import requests
 import pandas as pd
 from datetime import datetime
+from bs4 import BeautifulSoup
 
 
 def get_player_json(ally_code):
@@ -197,6 +198,49 @@ def get_base_units_and_abilities():
     return units, abilities
 
 
+def get_arena_average_rank(ally_code):
+    """
+    Получение средних значений арен игрока
+
+    :input ally_code (int):
+    :return (int х2):
+    """
+    url = f'https://swgoh.gg/p/{ally_code}/'
+    html = requests.get(url).text
+    soup = BeautifulSoup(html, 'html.parser')
+    value_average_rank = soup.find_all("div", {"class": "stat-item-value"})
+    value_list = []
+    for i in value_average_rank:
+        value_list.append(i.get_text())
+    if len(value_list) > 5:
+        chars_arena_rank = value_list[2]
+        ships_arena_rank = value_list[5]
+    else:
+        value_current_rank = soup.find_all("div", {"class": "current-rank-value"})
+        value_list = []
+        for i in value_current_rank:
+            value_list.append(i.get_text())
+        chars_arena_rank = value_list[0]
+        ships_arena_rank = value_list[1]
+    return chars_arena_rank, ships_arena_rank
+
+
+def get_arena_average_rank_for_list(data):
+    """
+    Получение средних значений арен игрока
+
+    :input data (DataFrame):
+    :return (list(int) х2):
+    """
+    chars_arena = []
+    ships_arena = []
+    for ally in data['ally_code']:
+        chars_arena_player, ships_arena_player = get_arena_average_rank(ally)
+        chars_arena.append(chars_arena_player)
+        ships_arena.append(ships_arena_player)
+    return chars_arena, ships_arena
+
+
 def sync_for_ally_list(ally_list):
     """
     Получение списка кодов игроков
@@ -211,6 +255,9 @@ def sync_for_ally_list(ally_list):
         data = pd.concat([data, get_data_player(json)])
         units = pd.concat([units, get_units_player(json)])
     data = data.sort_values(by=['player_name']).reset_index(drop=True)
+    chars_arena, ships_arena = get_arena_average_rank_for_list(data)
+    data['chars_average_rank'] = chars_arena
+    data['ships_average_rank'] = ships_arena
     units = units.sort_values(by=['ally_code']).reset_index(drop=True)
     chars, ships = units_combat_type(units)
     return data, chars, ships
@@ -233,6 +280,9 @@ def sync_for_guild_id(guild_id):
         data = pd.concat([data, data_player])
         units = pd.concat([units, units_player])
     data = data.sort_values(by=['player_name']).reset_index(drop=True)
+    chars_arena, ships_arena = get_arena_average_rank_for_list(data)
+    data['chars_average_rank'] = chars_arena
+    data['ships_average_rank'] = ships_arena
     units = units.sort_values(by=['ally_code']).reset_index(drop=True)
     chars, ships = units_combat_type(units)
     return data, chars, ships
